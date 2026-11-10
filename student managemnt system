@@ -1,0 +1,386 @@
+
+-- ============================================================
+   STUDENT MANAGEMENT SYSTEM
+-- Database: MySQL
+-- Project: Student Management System
+-- Tables: Students, Courses, Enrollments, Results
+-- ============================================================
+
+-- 1. DATABASE CREATION
+CREATE DATABASE IF NOT EXISTS StudentManagement;
+USE StudentManagement;
+
+-- Drop existing tables to allow fresh execution
+DROP TABLE IF EXISTS Results;
+DROP TABLE IF EXISTS Enrollments;
+DROP TABLE IF EXISTS Courses;
+DROP TABLE IF EXISTS Students;
+
+
+-- ============================================================
+-- 2. CREATE TABLES
+-- ============================================================
+
+-- STUDENTS TABLE
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    department VARCHAR(50)
+);
+
+-- COURSES TABLE
+CREATE TABLE Courses (
+    course_id INT PRIMARY KEY AUTO_INCREMENT,
+    course_name VARCHAR(100) NOT NULL,
+    credits INT NOT NULL,
+    CONSTRAINT chk_course_credits CHECK (credits > 0)
+);
+
+-- ENROLLMENTS TABLE
+CREATE TABLE Enrollments (
+    enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    enrollment_date DATE NOT NULL,
+
+    CONSTRAINT fk_enrollment_student
+        FOREIGN KEY (student_id)
+        REFERENCES Students(student_id),
+
+    CONSTRAINT fk_enrollment_course
+        FOREIGN KEY (course_id)
+        REFERENCES Courses(course_id),
+
+    CONSTRAINT uq_student_course
+        UNIQUE (student_id, course_id)
+);
+
+-- RESULTS TABLE
+CREATE TABLE Results (
+    result_id INT PRIMARY KEY AUTO_INCREMENT,
+    enrollment_id INT NOT NULL UNIQUE,
+    marks DECIMAL(5,2) NOT NULL,
+    grade VARCHAR(5) NOT NULL,
+
+    CONSTRAINT fk_result_enrollment
+        FOREIGN KEY (enrollment_id)
+        REFERENCES Enrollments(enrollment_id),
+
+    CONSTRAINT chk_marks
+        CHECK (marks >= 0 AND marks <= 100)
+);
+
+
+-- ============================================================
+-- 3. INSERT SAMPLE STUDENT DATA
+-- ============================================================
+
+INSERT INTO Students (full_name, email, department) VALUES
+('Ananya Rao', 'ananya.rao@example.com', 'CSE'),
+('Rahul Kumar', 'rahul.kumar@example.com', 'ECE'),
+('Sneha Reddy', 'sneha.reddy@example.com', 'CSE'),
+('Arjun Sharma', 'arjun.sharma@example.com', 'IT'),
+('Priya Nair', 'priya.nair@example.com', 'ECE');
+
+
+-- ============================================================
+-- 4. INSERT COURSE DATA
+-- ============================================================
+
+INSERT INTO Courses (course_name, credits) VALUES
+('Database Management Systems', 4),
+('Java Programming', 4),
+('Computer Networks', 3),
+('Operating Systems', 3);
+
+
+-- ============================================================
+-- 5. INSERT ENROLLMENT DATA
+-- ============================================================
+
+INSERT INTO Enrollments
+(student_id, course_id, enrollment_date) VALUES
+(1, 1, '2026-07-01'),
+(1, 2, '2026-07-01'),
+(2, 1, '2026-07-02'),
+(2, 3, '2026-07-02'),
+(3, 1, '2026-07-03'),
+(3, 4, '2026-07-03'),
+(4, 2, '2026-07-04'),
+(5, 3, '2026-07-05');
+
+
+-- ============================================================
+-- 6. INSERT RESULT DATA
+-- ============================================================
+
+INSERT INTO Results (enrollment_id, marks, grade) VALUES
+(1, 92.00, 'A'),
+(2, 85.00, 'A'),
+(3, 76.00, 'B'),
+(4, 88.00, 'A'),
+(5, 95.00, 'A'),
+(6, 81.00, 'A'),
+(7, 69.00, 'C'),
+(8, 73.00, 'B');
+
+
+-- ============================================================
+-- 7. ADDITIONAL STUDENT RECORDS
+-- ============================================================
+
+INSERT INTO Students (full_name, email, department) VALUES
+('Sai Deepika', 'deepika@gmail.com', 'CSE'),
+('Rahul Kumar', 'rahul@gmail.com', 'ECE'),
+('Priya Sharma', 'priya@gmail.com', 'IT'),
+('Ananya Reddy', 'ananya@gmail.com', 'CSE'),
+('Arjun Kumar', 'arjun@gmail.com', 'ECE');
+
+
+-- ============================================================
+-- 8. UPDATE STUDENT DETAILS
+-- ============================================================
+
+UPDATE Students
+SET department = 'IT'
+WHERE student_id = 6;
+
+-- ============================================================
+-- 9. DELETE STUDENT RECORD
+-- Student 9 has no enrollment records.
+-- ============================================================
+
+DELETE FROM Students
+WHERE student_id = 9;
+
+
+-- ============================================================
+-- 10. ADDITIONAL COURSES
+-- ============================================================
+
+INSERT INTO Courses (course_name, credits) VALUES
+('Python Programming', 4),
+('Data Structures', 3);
+
+
+-- ============================================================
+-- 11. ADDITIONAL ENROLLMENTS
+-- These combinations are new and do not duplicate existing ones.
+-- ============================================================
+
+INSERT INTO Enrollments
+(student_id, course_id, enrollment_date) VALUES
+(1, 5, '2026-11-05'),
+(1, 6, '2026-11-05'),
+(2, 5, '2026-11-05'),
+(3, 5, '2026-11-05'),
+(4, 6, '2026-11-05'),
+(5, 4, '2026-11-05');
+
+
+-- ============================================================
+-- 12. ADDITIONAL RESULTS
+-- Enrollment IDs 9 to 14 are new enrollment records.
+-- ============================================================
+
+INSERT INTO Results
+(enrollment_id, marks, grade) VALUES
+(9, 90.00, 'A'),
+(10, 87.00, 'A'),
+(11, 78.00, 'B'),
+(12, 93.00, 'A'),
+(13, 82.00, 'A'),
+(14, 75.00, 'B');
+
+
+-- ============================================================
+-- 13. BASIC SELECT QUERIES
+-- ============================================================
+
+-- Display all tables
+SHOW TABLES;
+
+-- View all students
+SELECT * FROM Students;
+
+-- View all courses
+SELECT * FROM Courses;
+
+-- View all enrollments
+SELECT * FROM Enrollments;
+
+-- View all results
+SELECT * FROM Results;
+
+
+-- ============================================================
+-- 14. FILTERING AND SORTING
+-- ============================================================
+
+-- Find students in CSE department
+SELECT *
+FROM Students
+WHERE department = 'CSE';
+
+-- Sort students alphabetically
+SELECT *
+FROM Students
+ORDER BY full_name ASC;
+
+-- Find students from ECE department
+SELECT *
+FROM Students
+WHERE department = 'ECE';
+
+-- Count total students
+SELECT COUNT(*) AS total_students
+FROM Students;
+
+-- Count total courses
+SELECT COUNT(*) AS total_courses
+FROM Courses;
+
+
+-- ============================================================
+-- 15. CRUD OPERATIONS
+-- ============================================================
+
+-- CREATE: Insert a new student
+-- INSERT INTO Students (full_name, email, department)
+-- VALUES ('Kiran Patel', 'kiran.patel@example.com', 'IT');
+
+-- READ: Display students
+SELECT * FROM Students;
+
+-- UPDATE: Change student department
+-- UPDATE Students
+-- SET department = 'CSE'
+-- WHERE student_id = 6;
+
+-- DELETE: Delete a student without enrollments
+-- DELETE FROM Students
+-- WHERE student_id = 9;
+
+
+-- ============================================================
+-- 16. INNER JOIN - STUDENT COURSE DETAILS
+-- ============================================================
+
+SELECT
+    s.student_id,
+    s.full_name,
+    c.course_name,
+    e.enrollment_date
+FROM Students s
+INNER JOIN Enrollments e
+    ON s.student_id = e.student_id
+INNER JOIN Courses c
+    ON e.course_id = c.course_id
+ORDER BY s.student_id;
+
+
+-- ============================================================
+-- 17. STUDENT MARKS AND GRADES
+-- ============================================================
+
+SELECT
+    s.student_id,
+    s.full_name,
+    c.course_name,
+    r.marks,
+    r.grade
+FROM Students s
+JOIN Enrollments e
+    ON s.student_id = e.student_id
+JOIN Courses c
+    ON e.course_id = c.course_id
+JOIN Results r
+    ON e.enrollment_id = r.enrollment_id
+ORDER BY s.full_name;
+
+
+-- ============================================================
+-- 18. AVERAGE MARKS FOR EACH COURSE
+-- ============================================================
+
+SELECT
+    c.course_name,
+    ROUND(AVG(r.marks), 2) AS average_marks
+FROM Courses c
+JOIN Enrollments e
+    ON c.course_id = e.course_id
+JOIN Results r
+    ON e.enrollment_id = r.enrollment_id
+GROUP BY c.course_id, c.course_name;
+
+
+-- ============================================================
+-- 19. HIGHEST SCORING STUDENT IN EACH COURSE
+-- ============================================================
+
+SELECT
+    c.course_name,
+    s.full_name,
+    r.marks
+FROM Results r
+JOIN Enrollments e
+    ON r.enrollment_id = e.enrollment_id
+JOIN Students s
+    ON e.student_id = s.student_id
+JOIN Courses c
+    ON e.course_id = c.course_id
+WHERE (e.course_id, r.marks) IN (
+    SELECT
+        e2.course_id,
+        MAX(r2.marks)
+    FROM Results r2
+    JOIN Enrollments e2
+        ON r2.enrollment_id = e2.enrollment_id
+    GROUP BY e2.course_id
+);
+
+
+-- ============================================================
+-- 20. STUDENTS SCORING 80 OR ABOVE
+-- ============================================================
+
+SELECT
+    s.full_name,
+    c.course_name,
+    r.marks,
+    r.grade
+FROM Students s
+JOIN Enrollments e
+    ON s.student_id = e.student_id
+JOIN Courses c
+    ON e.course_id = c.course_id
+JOIN Results r
+    ON e.enrollment_id = r.enrollment_id
+WHERE r.marks >= 80
+ORDER BY r.marks DESC;
+
+
+-- ============================================================
+-- 21. STUDENT PERFORMANCE REPORT
+-- ============================================================
+
+SELECT
+    s.student_id,
+    s.full_name,
+    COUNT(r.result_id) AS courses_completed,
+    ROUND(AVG(r.marks), 2) AS average_marks,
+    MAX(r.marks) AS highest_marks,
+    MIN(r.marks) AS lowest_marks
+FROM Students s
+JOIN Enrollments e
+    ON s.student_id = e.student_id
+JOIN Results r
+    ON e.enrollment_id = r.enrollment_id
+GROUP BY s.student_id, s.full_name
+ORDER BY average_marks DESC;
+
+
+-- ============================================================
+-- 22. END OF STUDENT MANAGEMENT SYSTEM PROJECT
+-- ============================================================
